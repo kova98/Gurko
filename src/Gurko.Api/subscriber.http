@@ -1,0 +1,6 @@
+﻿POST localhost:5000/subscriber
+Content-Type: application/json
+
+{
+  "name": "subscriber name"
+}
