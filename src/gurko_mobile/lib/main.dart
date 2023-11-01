@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
+import './notification_helper.dart';
 
 void main() => runApp(const MQTTApp());
 
@@ -13,6 +14,7 @@ class MQTTApp extends StatefulWidget {
 
 class _MQTTAppState extends State<MQTTApp> {
   MqttServerClient? client;
+  NotificationHelper notificationHelper = NotificationHelper();
 
   @override
   void initState() {
@@ -36,6 +38,11 @@ class _MQTTAppState extends State<MQTTApp> {
       final payload =
           MqttPublishPayload.bytesToStringAsString(message.payload.message);
       print('Received message: $payload');
+      notificationHelper.showNotification(
+        title: 'Notification Title',
+        body: 'Notification Body',
+        payload: payload,
+      );
     });
   }
 
