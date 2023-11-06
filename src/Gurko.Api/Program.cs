@@ -2,7 +2,6 @@ using Gurko.Api;
 using Gurko.Api.Models;
 using Gurko.Persistence;
 using MQTTnet.AspNetCore;
-using MQTTnet.Protocol;
 
 var builder = WebApplication.CreateBuilder(args);
     
@@ -17,6 +16,7 @@ builder.Services.AddScoped<ISubscriberRepository, SqliteSubscriberRepository>();
 builder.Services.AddSingleton<IConnectionRepository, InMemoryConnectionRepository>();
 builder.Services.AddTransient<SubscriberService>();
 builder.Services.AddTransient<PublishingService>();
+builder.Services.AddTransient<MqttEventsHandler>();
 
 builder.Services.AddHostedMqttServer(o =>
 {
@@ -32,30 +32,9 @@ app.UseRouting();
 
 app.UseMqttServer(server =>
 {
-    var connectionRepo = app.Services.GetRequiredService<IConnectionRepository>();
-    var subscriberRepo = app.Services.GetRequiredService<ISubscriberRepository>();
-    server.ValidatingConnectionAsync += async (args) =>
-    {
-        var subIdString = args.UserProperties?.FirstOrDefault(x => x.Name == "subscriberId");
-        if (subIdString?.Value == null || !Guid.TryParse(subIdString?.Value, out var subscriberId))
-        {
-            args.ReasonCode = MqttConnectReasonCode.ProtocolError;
-            args.ReasonString = "Missing subscriberId";
-            return;
-        }
-        
-        if (!await subscriberRepo.Exists(subscriberId))
-        {
-            args.ReasonCode = MqttConnectReasonCode.ProtocolError;
-            args.ReasonString = $"Subscriber '{subscriberId}' does not exist";
-        }
-    };
-    server.ClientConnectedAsync += async (args) =>
-    {
-        var subscriberId = args.UserProperties.First(x => x.Name == "subscriberId").Value;
-        var connection = new MqttConnection(server, Guid.Parse(subscriberId), args.ClientId, args.Endpoint);
-        await connectionRepo.Create(connection);
-    };
+    var mqttEventsHandler = app.Services.GetRequiredService<MqttEventsHandler>();
+    server.ValidatingConnectionAsync += mqttEventsHandler.HandleConnectionValidationAsync;
+    server.ClientConnectedAsync += mqttEventsHandler.HandleClientConnectedAsync;
 });
 
 app.UseHttpsRedirection();
