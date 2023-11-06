@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gurko.Api", "Gurko.api\Gurk
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gurko.Test", "Gurko.Test\Gurko.Test.csproj", "{3B787DD4-508A-4B31-9DE7-A3B82AE45D61}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gurko.Persistence", "Gurko.Persistence\Gurko.Persistence.csproj", "{E14E3CFC-DDA8-4D9D-9228-896B2F99C3E0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{3B787DD4-508A-4B31-9DE7-A3B82AE45D61}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B787DD4-508A-4B31-9DE7-A3B82AE45D61}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B787DD4-508A-4B31-9DE7-A3B82AE45D61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E14E3CFC-DDA8-4D9D-9228-896B2F99C3E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E14E3CFC-DDA8-4D9D-9228-896B2F99C3E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E14E3CFC-DDA8-4D9D-9228-896B2F99C3E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E14E3CFC-DDA8-4D9D-9228-896B2F99C3E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

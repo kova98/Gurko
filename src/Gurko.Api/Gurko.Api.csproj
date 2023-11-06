@@ -14,4 +14,12 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Persistence\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Gurko.Persistence\Gurko.Persistence.csproj" />
+  </ItemGroup>
+
 </Project>

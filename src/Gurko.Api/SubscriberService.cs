@@ -1,5 +1,5 @@
 ﻿using Gurko.Api.Models;
-using Gurko.Api.Persistence;
+using Gurko.Persistence;
 
 namespace Gurko.Api;
 

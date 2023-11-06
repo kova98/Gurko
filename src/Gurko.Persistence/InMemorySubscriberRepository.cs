@@ -1,4 +1,4 @@
-﻿namespace Gurko.Api.Persistence;
+﻿namespace Gurko.Persistence;
 
 public class InMemorySubscriberRepository : ISubscriberRepository
 {

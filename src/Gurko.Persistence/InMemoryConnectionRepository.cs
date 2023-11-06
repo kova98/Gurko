@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Gurko.Api.Persistence;
+namespace Gurko.Persistence;
 
 public class InMemoryConnectionRepository : IConnectionRepository
 {

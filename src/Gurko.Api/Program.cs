@@ -1,6 +1,6 @@
 using Gurko.Api;
 using Gurko.Api.Models;
-using Gurko.Api.Persistence;
+using Gurko.Persistence;
 using MQTTnet.AspNetCore;
 using MQTTnet.Protocol;
 
@@ -28,15 +28,6 @@ builder.Services.AddConnections();
 var app = builder.Build();
 
 app.UseRouting();
-
-app.UseEndpoints(
-    endpoints =>
-    {
-        endpoints.MapConnectionHandler<MqttConnectionHandler>(
-            "/mqtt",
-            httpConnectionDispatcherOptions => httpConnectionDispatcherOptions.WebSockets.SubProtocolSelector =
-                protocolList => protocolList.FirstOrDefault() ?? string.Empty);
-    });
 
 app.UseMqttServer(server =>
 {

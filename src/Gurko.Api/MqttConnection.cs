@@ -1,4 +1,4 @@
-﻿using Gurko.Api.Persistence;
+﻿using Gurko.Persistence;
 using MQTTnet;
 using MQTTnet.Server;
 
