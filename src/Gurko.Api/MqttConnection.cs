@@ -1,8 +1,9 @@
-﻿using Gurko.Persistence;
+﻿using Gurko.Api;
+using Gurko.Persistence;
 using MQTTnet;
 using MQTTnet.Server;
 
-public class MqttConnection(MqttServer mqttServer, Guid subscriberId) : IConnection
+public class MqttConnection(IMqttServer mqttServer, Guid subscriberId) : IConnection
 {
     public async Task Send(string message)
     {

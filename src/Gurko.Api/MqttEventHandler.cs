@@ -1,8 +1,12 @@
-﻿using MQTTnet.Server;
+﻿using Gurko.Api;
+using MQTTnet.Server;
 using Gurko.Persistence;
 using MQTTnet.Protocol;
 
-public class MqttEventsHandler(ILogger<MqttEventsHandler> logger, IServiceProvider serviceProvider, MqttServer mqttServer)
+public class MqttEventHandler(
+    IConnectionRepository connectionRepo, 
+    ISubscriberRepository subscriberRepo,
+    IMqttServer mqttServer)
 {
     public async Task HandleConnectionValidationAsync(ValidatingConnectionEventArgs args)
     {
@@ -14,9 +18,6 @@ public class MqttEventsHandler(ILogger<MqttEventsHandler> logger, IServiceProvid
             return;
         }
 
-        using var scope = serviceProvider.CreateScope();
-        var subscriberRepo = scope.ServiceProvider.GetRequiredService<ISubscriberRepository>();
-
         var exists = await subscriberRepo.Exists(subscriberId);
         if (!exists)
         {
@@ -27,9 +28,6 @@ public class MqttEventsHandler(ILogger<MqttEventsHandler> logger, IServiceProvid
 
     public async Task HandleClientConnectedAsync(ClientConnectedEventArgs args)
     {
-        using var scope = serviceProvider.CreateScope();
-        var connectionRepo = scope.ServiceProvider.GetRequiredService<IConnectionRepository>();
-
         var subscriberIdString = args.UserProperties.FirstOrDefault(x => x.Name == "subscriberId");
         var connection = new MqttConnection(mqttServer, Guid.Parse(subscriberIdString!.Value));
         await connectionRepo.Create(connection);

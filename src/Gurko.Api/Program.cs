@@ -12,11 +12,12 @@ builder.WebHost.ConfigureKestrel(o =>
 });
 
 builder.Services.AddDbContext<AppDbContext>();
-builder.Services.AddScoped<ISubscriberRepository, SqliteSubscriberRepository>();
+builder.Services.AddTransient<ISubscriberRepository, SqliteSubscriberRepository>();
 builder.Services.AddSingleton<IConnectionRepository, InMemoryConnectionRepository>();
 builder.Services.AddTransient<SubscriberService>();
 builder.Services.AddTransient<PublishingService>();
-builder.Services.AddTransient<MqttEventsHandler>();
+builder.Services.AddTransient<MqttEventHandler>();
+builder.Services.AddSingleton<IMqttServer, MqttServerWrapper>();
 
 builder.Services.AddHostedMqttServer(o =>
 {
@@ -32,7 +33,10 @@ app.UseRouting();
 
 app.UseMqttServer(server =>
 {
-    var mqttEventsHandler = app.Services.GetRequiredService<MqttEventsHandler>();
+    // TODO: This scope will never get disposed. Investigate how this is affecting the app and the possible
+    // workarounds to avoid this.
+    var scope = app.Services.CreateScope();
+    var mqttEventsHandler = scope.ServiceProvider.GetRequiredService<MqttEventHandler>();
     server.ValidatingConnectionAsync += mqttEventsHandler.HandleConnectionValidationAsync;
     server.ClientConnectedAsync += mqttEventsHandler.HandleClientConnectedAsync;
 });
