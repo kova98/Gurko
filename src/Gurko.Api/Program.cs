@@ -54,6 +54,9 @@ app.UseHttpsRedirection();
 app.MapPost("/subscriber", async (CreateSubscriberRequest req, SubscriberService s) =>
     (await s.CreateSubscriber(req)).ToHttpResult("/subscriber"));
 
+app.MapPost("/publish", async (PublishNotificationRequest req, PublishingService s) =>
+    (await s.PublishNotification(req)).ToHttpResult());
+
 app.MapPost("testmqtt", async (MqttServer mqttServer) =>
 {
     var message = new MqttApplicationMessageBuilder()
