@@ -12,7 +12,8 @@ builder.WebHost.ConfigureKestrel(o =>
     o.ListenAnyIP(5000);
 });
 
-builder.Services.AddSingleton<ISubscriberRepository, InMemorySubscriberRepository>();
+builder.Services.AddDbContext<AppDbContext>();
+builder.Services.AddScoped<ISubscriberRepository, SqliteSubscriberRepository>();
 builder.Services.AddSingleton<IConnectionRepository, InMemoryConnectionRepository>();
 builder.Services.AddTransient<SubscriberService>();
 builder.Services.AddTransient<PublishingService>();
