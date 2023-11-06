@@ -14,6 +14,7 @@ builder.WebHost.ConfigureKestrel(o =>
 });
 
 builder.Services.AddSingleton<ISubscriberRepository, InMemorySubscriberRepository>();
+builder.Services.AddSingleton<IConnectionRepository, InMemoryConnectionRepository>();
 builder.Services.AddTransient<SubscriberService>();
 
 builder.Services.AddHostedMqttServer(o =>
