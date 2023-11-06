@@ -1,9 +1,8 @@
 using Gurko.Api;
 using Gurko.Api.Models;
 using Gurko.Api.Persistence;
-using MQTTnet;
 using MQTTnet.AspNetCore;
-using MQTTnet.Server;
+using MQTTnet.Protocol;
 
 var builder = WebApplication.CreateBuilder(args);
     
@@ -16,6 +15,7 @@ builder.WebHost.ConfigureKestrel(o =>
 builder.Services.AddSingleton<ISubscriberRepository, InMemorySubscriberRepository>();
 builder.Services.AddSingleton<IConnectionRepository, InMemoryConnectionRepository>();
 builder.Services.AddTransient<SubscriberService>();
+builder.Services.AddTransient<PublishingService>();
 
 builder.Services.AddHostedMqttServer(o =>
 {
@@ -40,35 +40,38 @@ app.UseEndpoints(
 
 app.UseMqttServer(server =>
 {
+    var connectionRepo = app.Services.GetRequiredService<IConnectionRepository>();
+    var subscriberRepo = app.Services.GetRequiredService<ISubscriberRepository>();
     server.ValidatingConnectionAsync += async (args) =>
     {
-        Console.WriteLine("Validating connection");
+        var subIdString = args.UserProperties?.FirstOrDefault(x => x.Name == "subscriberId");
+        if (subIdString?.Value == null || !Guid.TryParse(subIdString?.Value, out var subscriberId))
+        {
+            args.ReasonCode = MqttConnectReasonCode.ProtocolError;
+            args.ReasonString = "Missing subscriberId";
+            return;
+        }
+        
+        if (!await subscriberRepo.Exists(subscriberId))
+        {
+            args.ReasonCode = MqttConnectReasonCode.ProtocolError;
+            args.ReasonString = $"Subscriber '{subscriberId}' does not exist";
+        }
     };
     server.ClientConnectedAsync += async (args) =>
     {
-        Console.WriteLine("Client connected");
+        var subscriberId = args.UserProperties.First(x => x.Name == "subscriberId").Value;
+        var connection = new MqttConnection(server, Guid.Parse(subscriberId), args.ClientId, args.Endpoint);
+        await connectionRepo.Create(connection);
     };
 });
 
 app.UseHttpsRedirection();
 
-app.MapPost("/subscriber", async (CreateSubscriberRequest req, SubscriberService s) =>
-    (await s.CreateSubscriber(req)).ToHttpResult("/subscriber"));
+app.MapPost("/subscriber", async (CreateSubscriberRequest req, SubscriberService subscriberService) =>
+    (await subscriberService.CreateSubscriber(req)).ToHttpResult("/subscriber"));
 
-app.MapPost("/publish", async (PublishNotificationRequest req, PublishingService s) =>
-    (await s.PublishNotification(req)).ToHttpResult());
-
-app.MapPost("testmqtt", async (MqttServer mqttServer) =>
-{
-    var message = new MqttApplicationMessageBuilder()
-        .WithTopic("flutter/mqtt")
-        .WithPayload("Test")
-        .Build();
-
-    await mqttServer.InjectApplicationMessage(new InjectedMqttApplicationMessage(message)
-    {
-        SenderClientId = "SenderClientId"
-    });
-});
+app.MapPost("/publish", async (PublishNotificationRequest req, PublishingService publishingService) =>
+    (await publishingService.PublishNotification(req)).ToHttpResult());
 
 app.Run();

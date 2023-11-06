@@ -1,0 +1,7 @@
+﻿POST localhost:5000/publish
+Content-Type: application/json
+
+{
+  "subscriberId": "ba5c7671-8a7b-4eed-a4bd-8e33d1f724dd",
+  "content": "content"
+}

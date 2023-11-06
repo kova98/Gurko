@@ -3,11 +3,11 @@
 public interface IConnectionRepository
 {
     Task<long> Create(IConnection connection);
-    IEnumerable<IConnection> GetSubscriberConnections(string subscriberId);
+    IEnumerable<IConnection> GetSubscriberConnections(Guid subscriberId);
 }
 
 public interface IConnection
 {
     Task Send(string message);
-    string Subscriber { get; }
+    Guid SubscriberId { get; }
 }

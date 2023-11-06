@@ -7,12 +7,17 @@ public class PublishingService(ISubscriberRepository repo, IConnectionRepository
 {
     public async Task<Result> PublishNotification(PublishNotificationRequest req)
     {
-        if (!await repo.Exists(req.subscriberId))
+        if (!Guid.TryParse(req.subscriberId, out var subscriberId))
         {
-            return Result.Fail($"Subscriber '{req.subscriberId}' does not exist");
+            return Result.Fail("Invalid subscriber id.");
         }
         
-        foreach (var connection in connectionRepo.GetSubscriberConnections(req.subscriberId))
+        if (!await repo.Exists(subscriberId))
+        {
+            return Result.Fail($"Subscriber '{subscriberId}' does not exist.");
+        }
+        
+        foreach (var connection in connectionRepo.GetSubscriberConnections(subscriberId))
         {
             await connection.Send(req.content);
         }

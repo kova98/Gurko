@@ -4,13 +4,13 @@ using Gurko.Api.Persistence;
 
 namespace Gurko.Test;
 
-public class PublishNotificationServiceTests
+public class PublishingServiceTests
 {
     private readonly ISubscriberRepository _subscriberRepo = Substitute.For<ISubscriberRepository>();
     private readonly IConnectionRepository _connectionRepo = Substitute.For<IConnectionRepository>();
     private readonly PublishingService _service;
 
-    public PublishNotificationServiceTests()
+    public PublishingServiceTests()
     {
         _service = new PublishingService(_subscriberRepo, _connectionRepo);
     }
@@ -18,19 +18,20 @@ public class PublishNotificationServiceTests
     [Fact]
     public async Task PublishNotification_SubscriberDoesNotExist_ReturnsFailure()
     {
-        var notification = new PublishNotificationRequest("content", "subscriberId");
+        var notification = new PublishNotificationRequest("content", Guid.NewGuid().ToString());
         
         var result = await _service.PublishNotification(notification);
 
         result.Status.Should().Be(ResultStatus.Failure);
-        result.Error.Should().Be($"Subscriber 'subscriberId' does not exist");
+        result.Error.Should().Be($"Subscriber '{notification.subscriberId}' does not exist.");
     }
     
     [Fact]
     public async Task PublishNotification_SubscriberExists_ReturnsOk()
     {
-        var notification = new PublishNotificationRequest("content", "subscriberId");
-        _subscriberRepo.Exists("subscriberId").Returns(true);
+        var subId = Guid.NewGuid();
+        var notification = new PublishNotificationRequest("content", subId.ToString());
+        _subscriberRepo.Exists(subId).Returns(true);
         
         var result = await _service.PublishNotification(notification);
 
@@ -38,13 +39,25 @@ public class PublishNotificationServiceTests
     }
 
     [Fact]
+    public async Task PublishNotification_InvalidSubscriberId_ReturnsFailure()
+    {
+        var notification = new PublishNotificationRequest("content", "invalid guid");
+        
+        var result = await _service.PublishNotification(notification);
+
+        result.Status.Should().Be(ResultStatus.Failure);
+        result.Error.Should().Be($"Invalid subscriber id.");
+    }
+    
+    [Fact]
     public async Task PublishNotification_SendsMessageToAllConnections()
     {
-        var notification = new PublishNotificationRequest("content", "subscriberId");
-        _subscriberRepo.Exists("subscriberId").Returns(true);
+        var subId = Guid.NewGuid();
+        var notification = new PublishNotificationRequest("content", subId.ToString());
+        _subscriberRepo.Exists(subId).Returns(true);
         var connections = Enumerable.Range(0, 5).Select(_ => Substitute.For<IConnection>()).ToList();
         _connectionRepo
-            .GetSubscriberConnections(notification.subscriberId)
+            .GetSubscriberConnections(subId)
             .Returns(connections);
 
         await _service.PublishNotification(notification);

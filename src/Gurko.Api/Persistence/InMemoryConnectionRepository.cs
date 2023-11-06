@@ -13,8 +13,8 @@ public class InMemoryConnectionRepository : IConnectionRepository
         return Task.FromResult(_id);
     }
     
-    public IEnumerable<IConnection> GetSubscriberConnections(string subscriberId) => _connections.Values
-        .Where(x => x.Subscriber == subscriberId);
+    public IEnumerable<IConnection> GetSubscriberConnections(Guid subscriberId) => _connections.Values
+        .Where(x => x.SubscriberId == subscriberId);
     
     private long NextId() => Interlocked.Increment(ref _id);
 }
