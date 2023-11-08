@@ -69,3 +69,9 @@ A Client sends a Notification publish request with the content and subscriber id
 ### Establishing Connection
 
 On app startup, the Device sends a Subscription request with a Subscriber id. The server processes the request and opens a connection. Whenever necessary, the Device should re-establish the connection.
+
+# Limitations
+
+Since Android Oreo, Google introduced limitations to background services. They are killed whenever the app is closed. Running a background service requires a permanent notification. Source: https://stackoverflow.com/a/34573169
+
+In addition, most manufacturers introduce significant limitations: https://dontkillmyapp.com/
